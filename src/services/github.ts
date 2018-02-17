@@ -157,8 +157,8 @@ export class GithubService {
             repository: this._parseRepoName(info.repository_url),
             link: info.pull_request.html_url,
             title: info.title || 'NO TITLE',
-            opened_at: info.created_at.toString(),
-            updated_at: info.updated_at.toString() || info.created_at.toString()
+            opened_at: info.created_at,
+            updated_at: info.updated_at|| info.created_at
         };
         return cleanPR;
     }

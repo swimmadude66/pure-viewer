@@ -36,8 +36,8 @@ export interface Milestone {
     open_issues: number;
     closed_issues: number;
     state: string;
-    created_at: Date;
-    updated_at: Date;
+    created_at: string;
+    updated_at: string;
     due_on?: any,
     closed_at?: any;
 }
@@ -60,9 +60,9 @@ export interface PullRequest {
     assignees: User[],
     milestone?: Milestone;
     comments: number;
-    created_at: Date;
-    updated_at?: Date;
-    closed_at?: Date,
+    created_at: string;
+    updated_at?: string;
+    closed_at?: string,
     author_association: string;
     pull_request: {
         url: string;

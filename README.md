@@ -1,4 +1,4 @@
-# PuRe Viewer (**PU**ll **RE**quest Viewer)
+# PuRe Viewer (**Pu**ll **Re**quest Viewer)
 
 _Get open pull requests for any set of github users_
 
