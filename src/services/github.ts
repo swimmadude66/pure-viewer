@@ -140,7 +140,7 @@ export class GithubService {
         const cleanPR = {
             author: info.user.login,
             repository: this._parseRepoName(info.repository_url),
-            link: info.pull_request.url,
+            link: info.pull_request.html_url,
             title: info.title || 'NO TITLE',
             opened_at: info.created_at.toString(),
             updated_at: info.updated_at.toString() || info.created_at.toString()
