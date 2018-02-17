@@ -1,7 +1,13 @@
 import * as request from 'request';
 import {Observable} from 'rxjs/Rx';
 import {ConfigService} from './config';
-import {SearchResult, PullRequest, User} from '../models/github';
+import {
+    SearchResult,
+    PullRequest,
+    User,
+    PullRequestInfo,
+    UserInfo,
+} from '../models';
 
 type Requester = request.RequestAPI<request.Request, request.CoreOptions, request.RequiredUriUrl>;
 
@@ -61,18 +67,24 @@ export class GithubService {
     * Returns the 100 most recently updated PRs authored by each of the users
     * @param users: a list of github usernames to look for
     */
-    getPRsForUsers(users: string[]): Observable<{[username: string]: SearchResult<PullRequest>}> {
+    getPRsForUsers(users: string[]): Observable<{[username: string]: UserInfo}> {
         const requests = [];
         users.forEach(u => {
             requests.push(this.getPRsForUser(u));
         });
         return Observable.forkJoin(requests)
-        .map(responses => {
-            const userPRs = {};
+        .map((responses: SearchResult<PullRequest>[]) => {
+            const userMap = {};
             users.forEach((u: string, i: number) => {
-                userPRs[u] = responses[i];
+                const result = responses[i];
+                const prs = result.items.map(item => this._parsePRInfo(item));
+                userMap[u] = {
+                    username: u,
+                    total: result.total_count,
+                    pull_requests: prs 
+                }
             });
-            return userPRs;
+            return userMap;
         });
     }
 
@@ -120,9 +132,19 @@ export class GithubService {
         });
     }
 
-    private _parsePRInfo(info: any): any {
+    private _parseRepoName(repo_url: string): string {
+        return repo_url.replace(/^.*?(([^/]+)\/([^/]+))$/ig, '$1');
+    }
+
+    private _parsePRInfo(info: PullRequest): PullRequestInfo {
         const cleanPR = {
-            repository: info.repository_url
-        }
+            author: info.user.login,
+            repository: this._parseRepoName(info.repository_url),
+            link: info.pull_request.url,
+            title: info.title || 'NO TITLE',
+            opened_at: info.created_at.toString(),
+            updated_at: info.updated_at.toString() || info.created_at.toString()
+        };
+        return cleanPR;
     }
 }

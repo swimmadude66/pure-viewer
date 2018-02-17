@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import * as program from 'commander';
+import * as colors from 'colors';
 import {Observable} from 'rxjs/Rx';
 import {prompt} from 'inquirer';
 import {
@@ -53,7 +54,8 @@ program
     .description('a cli-tool to display open pull requests by user')
     .option('-u, --username <username>', 'Authenticate as this github user')
     .option('-p, --password', 'Authenticate with a password')
-    .option('-t, --token', 'Authenticate with a github Personal Access Token');
+    .option('-t, --token', 'Authenticate with a github Personal Access Token')
+    .option('--no-color', 'Disables console output colors and style');
 
 // Set Config
 program
@@ -137,7 +139,25 @@ program
         parseAuth(opts)
         .flatMap(_ => github.getPRsForUsers(allUsers))
         .subscribe(
-            PRs => logger.log(JSON.stringify(PRs, null, 2)),
+            PRMap => {
+                let output = '';
+                Object.keys(PRMap).forEach(u => {
+                    output += `\n${u}`;
+                    const userInfo = PRMap[u];
+                    output += `\nTotal Open Pull Requests: ${userInfo.total}`;
+                    if (userInfo.total) {
+                        userInfo.pull_requests.forEach(pr => {
+                            output += `\n  - ${pr.title}`;
+                            output += colors.blue(`\n\t  ${pr.link}`);
+                            output += `\n\t  Repo: ${pr.repository}`;
+                            output += `\n\t  Opened: ${pr.opened_at}`;
+                            output += `\n\t  Updated: ${pr.updated_at}\n`;
+                        });
+                    }
+                    output += '\n=============================================\n';
+                });
+                logger.log(output);
+            },
             err => logger.error(err)
         );
     });
