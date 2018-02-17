@@ -9,9 +9,16 @@ export class ConfigService {
     private _configuration: {[key: string]: string};
 
     constructor() {
+        this._configuration = {};
         const hasConfig = existsSync(CONFIG_LOCATION);
         if (hasConfig) {
-            JSON.parse(readFileSync(CONFIG_LOCATION).toString());
+            try {
+                const fileContents = readFileSync(CONFIG_LOCATION);
+                JSON.parse(fileContents.toString() || '{}');
+            } catch (e) {
+                console.error('Could not read config file!');
+            }
+            
         } else {
             writeFileSync(CONFIG_LOCATION, '{}');
         }
