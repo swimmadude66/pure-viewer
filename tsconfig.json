@@ -10,5 +10,10 @@
     "removeComments": true,
     "noImplicitAny": false,
     "outDir": "dist/"
-  }
+  },
+  "exclude": [
+    "node_modules/**/*",
+    "**/*.spec.ts",
+    "**/*.mock.ts"
+  ]
 }

@@ -8,7 +8,7 @@ export class AliasService {
     }
 
     getAlias(key?: string): string[] | {[key: string]: string[]} {
-        if (key in this._aliases) {
+        if (key) {
             return this._aliases[key] || [];
         } else {
             return this._aliases || {};
@@ -21,7 +21,7 @@ export class AliasService {
     }
 
     deleteAlias(key?: string): void {
-        if (key && (key in this._aliases)) {
+        if (key) {
             delete this._aliases[key];
         } else {
             this._aliases = {};

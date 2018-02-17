@@ -18,10 +18,6 @@ const logger: LoggingService = new LoggingService(configService);
 const passwordPrompt = {type: 'password', name: 'password', message: 'Enter Password:'};
 const tokenPrompt = {type: 'password', name: 'token', message: 'Enter Token:'};
 
-function coerceList(value: string) {
-    return value.split(/\s*(,|\s+)\s*/g);
-}
-
 /*
 * Parse auth flags to allow auth on a single command
 */

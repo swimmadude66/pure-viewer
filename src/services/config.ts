@@ -8,19 +8,19 @@ export class ConfigService {
 
     private _configuration: {[key: string]: string};
 
-    constructor() {
+    constructor(private _configFileLocation = CONFIG_LOCATION) {
         this._configuration = {};
-        const hasConfig = existsSync(CONFIG_LOCATION);
+        const hasConfig = existsSync(_configFileLocation);
         if (hasConfig) {
             try {
-                const fileContents = readFileSync(CONFIG_LOCATION);
+                const fileContents = readFileSync(_configFileLocation);
                 this._configuration = JSON.parse(fileContents.toString() || '{}');
             } catch (e) {
                 console.error('Could not read config file!');
             }
             
         } else {
-            writeFileSync(CONFIG_LOCATION, '{}');
+            writeFileSync(_configFileLocation, '{}');
         }
     }
 
@@ -34,7 +34,7 @@ export class ConfigService {
 
     setConfig(key: string, value: string): void {
         this._configuration[key] = value;
-        writeFileSync(CONFIG_LOCATION, JSON.stringify(this._configuration));
+        writeFileSync(this._configFileLocation, JSON.stringify(this._configuration));
     }
 
     deleteConfig(key?: string): void {
@@ -43,7 +43,7 @@ export class ConfigService {
         } else {
             this._configuration = {};
         }
-        writeFileSync(CONFIG_LOCATION, JSON.stringify(this._configuration));
+        writeFileSync(this._configFileLocation, JSON.stringify(this._configuration));
     }
 
     hasKey(key: string): boolean {
