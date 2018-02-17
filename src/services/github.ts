@@ -20,7 +20,6 @@ export class GithubService {
         if (_config.hasKey('auth')) {
             headers['Authorization'] = `BASIC ${_config.getConfig('auth')}`;
         }
-
         this._api = request.defaults({
             baseUrl: 'https://api.github.com',
             headers
@@ -49,17 +48,13 @@ export class GithubService {
                         observer.error('Could not Authenticate');
                     }
                 } else {
+                    this._api = newDefault;
+                    this._config.setConfig('auth', basicAuth);
                     observer.next(newDefault);
                     observer.complete(newDefault);
                 }
             });
-        })
-        .do(
-            requester => {
-                this._api = requester;
-                this._config.setConfig('auth', basicAuth);
-            }
-        );
+        });
     }
 
     /*

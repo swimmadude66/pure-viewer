@@ -1,4 +1,4 @@
-import {readFileSync, writeFileSync, existsSync} from 'fs';
+import {readFileSync, writeFileSync, existsSync, write} from 'fs';
 import {homedir} from 'os';
 import {join} from 'path';
 
@@ -14,7 +14,7 @@ export class ConfigService {
         if (hasConfig) {
             try {
                 const fileContents = readFileSync(CONFIG_LOCATION);
-                JSON.parse(fileContents.toString() || '{}');
+                this._configuration = JSON.parse(fileContents.toString() || '{}');
             } catch (e) {
                 console.error('Could not read config file!');
             }
@@ -34,6 +34,15 @@ export class ConfigService {
 
     setConfig(key: string, value: string): void {
         this._configuration[key] = value;
+        writeFileSync(CONFIG_LOCATION, JSON.stringify(this._configuration));
+    }
+
+    deleteConfig(key?: string): void {
+        if (key) {
+            delete this._configuration[key];
+        } else {
+            this._configuration = {};
+        }
         writeFileSync(CONFIG_LOCATION, JSON.stringify(this._configuration));
     }
 
