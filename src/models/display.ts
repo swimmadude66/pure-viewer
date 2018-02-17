@@ -1,6 +1,7 @@
 
 export interface PullRequestInfo {
     author: string;
+    assignees?: string;
     repository: string;
     link: string;
     title: string;

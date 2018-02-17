@@ -56,8 +56,8 @@ export interface PullRequest {
     labels: any[];
     state: string;
     locked: boolean;
-    assignee?: any;
-    assignees: any[],
+    assignee?: User;
+    assignees: User[],
     milestone?: Milestone;
     comments: number;
     created_at: Date;

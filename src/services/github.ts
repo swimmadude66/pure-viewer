@@ -67,17 +67,42 @@ export class GithubService {
     * Returns the 100 most recently updated PRs authored by each of the users
     * @param users: a list of github usernames to look for
     */
-    getPRsForUsers(users: string[]): Observable<{[username: string]: UserInfo}> {
+    getPRsForAuthors(users: string[]): Observable<{[username: string]: UserInfo}> {
         const requests = [];
         users.forEach(u => {
-            requests.push(this.getPRsForUser(u));
+            requests.push(this.getPRsForAuthor(u));
         });
         return Observable.forkJoin(requests)
         .map((responses: SearchResult<PullRequest>[]) => {
             const userMap = {};
             users.forEach((u: string, i: number) => {
                 const result = responses[i];
-                const prs = result.items.map(item => this._parsePRInfo(item));
+                const prs = (result.items || []).map(item => this._parsePRInfo(item));
+                userMap[u] = {
+                    username: u,
+                    total: result.total_count,
+                    pull_requests: prs 
+                }
+            });
+            return userMap;
+        });
+    }
+
+    /*
+    * Returns the 100 most recently updated PRs assigned to each of the users
+    * @param users: a list of github usernames to look for
+    */
+    getPRsForAsignees(users: string[]): Observable<{[username: string]: UserInfo}> {
+        const requests = [];
+        users.forEach(u => {
+            requests.push(this.getPRsForAssignee(u));
+        });
+        return Observable.forkJoin(requests)
+        .map((responses: SearchResult<PullRequest>[]) => {
+            const userMap = {};
+            users.forEach((u: string, i: number) => {
+                const result = responses[i];
+                const prs = (result.items || []).map(item => this._parsePRInfo(item));
                 userMap[u] = {
                     username: u,
                     total: result.total_count,
@@ -92,7 +117,7 @@ export class GithubService {
     * Returns the 100 most recently updated open PRs authored by the given user
     * @param username: the github username of the user to lookup 
     */
-    getPRsForUser(username: string): Observable<SearchResult<PullRequest>> {
+    getPRsForAuthor(username: string): Observable<SearchResult<PullRequest>> {
         return Observable.create(observer => {
             this._api.get(`/search/issues?sort=updated&q=type:pr state:open author:${username}`, (err, response, body) => {
                 if (err) {
@@ -100,8 +125,38 @@ export class GithubService {
                 } else {
                     try {
                         const json = JSON.parse(body);
-                        observer.next(json);
-                        observer.complete(json);
+                        if (response.statusCode === 200) {
+                            observer.next(json);
+                            observer.complete(json);
+                        } else {
+                            observer.error('Github API Error: ' + json.errors[0].message);
+                        }
+                    } catch (e) {
+                        observer.error(e);
+                    }
+                }
+            });
+        });
+    }
+
+    /*
+    * Returns the 100 most recently updated open PRs assigned to the given user
+    * @param username: the github username of the user to lookup 
+    */
+    getPRsForAssignee(username: string): Observable<SearchResult<PullRequest>> {
+        return Observable.create(observer => {
+            this._api.get(`/search/issues?sort=updated&q=type:pr state:open asignee:${username}`, (err, response, body) => {
+                if (err) {
+                    observer.error(err);
+                } else {
+                    try {
+                        const json = JSON.parse(body);
+                        if (response.statusCode === 200) {
+                            observer.next(json);
+                            observer.complete(json);
+                        } else {
+                            observer.error('Github API Error: ' + json.errors[0].message);
+                        }
                     } catch (e) {
                         observer.error(e);
                     }
@@ -139,6 +194,7 @@ export class GithubService {
     private _parsePRInfo(info: PullRequest): PullRequestInfo {
         const cleanPR = {
             author: info.user.login,
+            assignees: info.assignees.map(a => a.login).join(', '),
             repository: this._parseRepoName(info.repository_url),
             link: info.pull_request.html_url,
             title: info.title || 'NO TITLE',

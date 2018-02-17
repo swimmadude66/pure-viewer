@@ -7,8 +7,12 @@ export class AliasService {
         this._aliases = JSON.parse(<string>_config.getConfig('aliases') || '{}');
     }
 
-    getAlias(key: string): string[] {
-        return this._aliases[key] || [];
+    getAlias(key?: string): string[] | {[key: string]: string[]} {
+        if (key in this._aliases) {
+            return this._aliases[key] || [];
+        } else {
+            return this._aliases || {};
+        }
     }
 
     setAlias(key: string, value: string[]): void {
@@ -16,8 +20,12 @@ export class AliasService {
         this._updateConfig();
     }
 
-    deleteAlias(key: string): void {
-        delete this._aliases[key];
+    deleteAlias(key?: string): void {
+        if (key && (key in this._aliases)) {
+            delete this._aliases[key];
+        } else {
+            this._aliases = {};
+        }
         this._updateConfig();
     }
 
