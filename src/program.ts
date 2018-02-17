@@ -9,17 +9,23 @@ import {
     GithubService,
     LoggingService,
 } from './services';
+import {UserInfo} from './models';
 
+// Services Used
 const configService: ConfigService = new ConfigService();
 const aliasService: AliasService = new AliasService(configService);
 const github: GithubService = new GithubService(configService);
 const logger: LoggingService = new LoggingService(configService);
 
+// Re-usable prompts
 const passwordPrompt = {type: 'password', name: 'password', message: 'Enter Password:'};
 const tokenPrompt = {type: 'password', name: 'token', message: 'Enter Token:'};
 
+// Helper functions
+
 /*
 * Parse auth flags to allow auth on a single command
+* @param opts: the options object returned by commander
 */
 function parseAuth(opts): Observable<any> {
     if ((!opts) || (!opts.username && !opts.password && !opts.token)) {
@@ -43,6 +49,33 @@ function parseAuth(opts): Observable<any> {
     }
 }
 
+/*
+* Format the results of the github calls in a cli-friendly way
+* @param PRMap: the mapping of usernames to results from github
+*/
+function formatResults(PRMap: {[username: string]: UserInfo}) {
+    let output = '';
+    Object.keys(PRMap).forEach(u => {
+        output += `\n${u}`;
+        const userInfo = PRMap[u];
+        output += `\nTotal Open Pull Requests: ${userInfo.total}`;
+        if (userInfo.total) {
+            userInfo.pull_requests.forEach(pr => {
+                output += `\n  - ${pr.title}`;
+                output += colors.blue(`\n\t  ${pr.link}`);
+                output += `\n\t  Author: ${pr.author}`;
+                output += `\n\t  Assigned: ${pr.assignees ||'No one assigned'}`;
+                output += `\n\t  Repo: ${pr.repository}`;
+                output += `\n\t  Opened: ${pr.opened_at}`;
+                output += `\n\t  Updated: ${pr.updated_at}\n`;
+            });
+        }
+        output += '\n=============================================\n';
+    });
+    return output;
+}
+
+// Program commands
 
 // Base info
 program
@@ -168,7 +201,7 @@ program
 
 // Get PRs for by author
 program
-    .command('fetch-authors <user> [moreUsers...]')
+    .command('by-author <user> [moreUsers...]')
     .description('Retrieve all open pull requests authored by the given user(s)')
     .action((user, moreUsers, cmd) => {
         const opts = {...cmd, ...cmd.parent}; // capture options from parent too
@@ -186,32 +219,14 @@ program
         .flatMap(_ => github.getPRsForAuthors(resolved))
         .subscribe(
             PRMap => {
-                let output = '';
-                Object.keys(PRMap).forEach(u => {
-                    output += `\n${u}`;
-                    const userInfo = PRMap[u];
-                    output += `\nTotal Open Pull Requests: ${userInfo.total}`;
-                    if (userInfo.total) {
-                        userInfo.pull_requests.forEach(pr => {
-                            output += `\n  - ${pr.title}`;
-                            output += colors.blue(`\n\t  ${pr.link}`);
-                            output += `\n\t  Author: ${pr.author}`;
-                            output += `\n\t  Assigned: ${pr.assignees ||'No one assigned'}`;
-                            output += `\n\t  Repo: ${pr.repository}`;
-                            output += `\n\t  Opened: ${pr.opened_at}`;
-                            output += `\n\t  Updated: ${pr.updated_at}\n`;
-                        });
-                    }
-                    output += '\n=============================================\n';
-                });
-                logger.log(output);
+                logger.log(formatResults(PRMap));
             },
             err => logger.error(err)
         );
     });
 
 program
-    .command('fetch-assigned <user> [moreUsers...]')
+    .command('by-assignee <user> [moreUsers...]')
     .description('Retrieve all open pull requests assigned to the given user(s)')
     .action((user, moreUsers, cmd) => {
         const opts = {...cmd, ...cmd.parent}; // capture options from parent too
@@ -229,25 +244,7 @@ program
         .flatMap(_ => github.getPRsForAsignees(resolved))
         .subscribe(
             PRMap => {
-                let output = '';
-                Object.keys(PRMap).forEach(u => {
-                    output += `\n${u}`;
-                    const userInfo = PRMap[u];
-                    output += `\nTotal Assigned Open Pull Requests: ${userInfo.total}`;
-                    if (userInfo.total) {
-                        userInfo.pull_requests.forEach(pr => {
-                            output += `\n  - ${pr.title}`;
-                            output += colors.blue(`\n\t  ${pr.link}`);
-                            output += `\n\t  Author: ${pr.author}`;
-                            output += `\n\t  Assigned: ${pr.assignees ||'No one assigned'}`;                            
-                            output += `\n\t  Repo: ${pr.repository}`;
-                            output += `\n\t  Opened: ${pr.opened_at}`;
-                            output += `\n\t  Updated: ${pr.updated_at}\n`;
-                        });
-                    }
-                    output += '\n=============================================\n';
-                });
-                logger.log(output);
+                logger.log(formatResults(PRMap));
             },
             err => logger.error(err)
         );
