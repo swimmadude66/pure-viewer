@@ -5,7 +5,9 @@
   "main": "dist/program.js",
   "scripts": {
     "build": "tsc",
-    "test": "mocha -r ts-node/register src/tests/*.spec.ts --exit"
+    "start": "node dist/program.js",
+    "test": "mocha -r ts-node/register src/tests/*.spec.ts --exit",
+    "prepublishOnly": "tsc && npm test"
   },
   "keywords": [
     "github",
