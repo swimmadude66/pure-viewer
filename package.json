@@ -6,9 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/program.js",
-    "test": "mocha -r ts-node/register src/tests/*.spec.ts --exit",
-    "postinstall": "tsc",
-    "prepublishOnly": "tsc && npm test"
+    "test": "mocha -r ts-node/register src/tests/*.spec.ts --exit"
   },
   "keywords": [
     "github",
