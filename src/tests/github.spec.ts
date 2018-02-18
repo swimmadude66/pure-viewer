@@ -39,8 +39,44 @@ const fakeSearchResult = {
             labels: [],
             state: "open",
             locked: false,
-            assignee: null,
-            assignees: [],
+            assignee: {
+                login: "testuser",
+                id: 123456,
+                avatar_url: "https://avatars1.githubusercontent.com/u/123456?v=4",
+                gravatar_id: "",
+                url: "https://api.github.com/users/testuser",
+                html_url: "https://github.com/testuser",
+                followers_url: "https://api.github.com/users/testuser/followers",
+                following_url: "https://api.github.com/users/testuser/following{/other_user}",
+                gists_url: "https://api.github.com/users/testuser/gists{/gist_id}",
+                starred_url: "https://api.github.com/users/testuser/starred{/owner}{/repo}",
+                subscriptions_url: "https://api.github.com/users/testuser/subscriptions",
+                organizations_url: "https://api.github.com/users/testuser/orgs",
+                repos_url: "https://api.github.com/users/testuser/repos",
+                events_url: "https://api.github.com/users/testuser/events{/privacy}",
+                received_events_url: "https://api.github.com/users/testuser/received_events",
+                type: "User",
+                site_admin: false
+            },
+            assignees: [{
+                login: "testuser",
+                id: 123456,
+                avatar_url: "https://avatars1.githubusercontent.com/u/123456?v=4",
+                gravatar_id: "",
+                url: "https://api.github.com/users/testuser",
+                html_url: "https://github.com/testuser",
+                followers_url: "https://api.github.com/users/testuser/followers",
+                following_url: "https://api.github.com/users/testuser/following{/other_user}",
+                gists_url: "https://api.github.com/users/testuser/gists{/gist_id}",
+                starred_url: "https://api.github.com/users/testuser/starred{/owner}{/repo}",
+                subscriptions_url: "https://api.github.com/users/testuser/subscriptions",
+                organizations_url: "https://api.github.com/users/testuser/orgs",
+                repos_url: "https://api.github.com/users/testuser/repos",
+                events_url: "https://api.github.com/users/testuser/events{/privacy}",
+                received_events_url: "https://api.github.com/users/testuser/received_events",
+                type: "User",
+                site_admin: false
+            }],
             milestone: null,
             comments: 1,
             created_at: "2017-11-03T12:30:54Z",
@@ -75,7 +111,7 @@ describe('GithubService', () => {
         .thenReturn(Observable.of(fakeSearchResult));
     });
 
-    it('should return search formatted results', (done) => {
+    it('should format author search results', (done) => {
         githubService.getPRsForAuthors(['testuser'])
         .subscribe(
             PRMap => {
@@ -88,6 +124,29 @@ describe('GithubService', () => {
                 const prinfo = PRMap['testuser'].pull_requests[0];
                 expect(prinfo.author).to.equal('testuser');
                 expect(prinfo.repository).to.equal('testuser/testrepo');
+                expect(prinfo.assignees).to.not.be.null;
+                expect(prinfo.assignees).to.equal('testuser', 'incorrectly parsed asignees')
+                done();
+            },
+            err => done(err)
+        );
+    });
+
+    it('should format assignee search results', (done) => {
+        githubService.getPRsForAssignees(['testuser'])
+        .subscribe(
+            PRMap => {
+                expect(PRMap).to.not.be.null;
+                expect(PRMap).to.have.key('testuser');
+                expect(PRMap['testuser']).to.have.keys(['username', 'total', 'pull_requests']);
+                expect(PRMap['testuser'].username).to.equal('testuser');
+                expect(PRMap['testuser'].total).to.equal(1);
+                expect(PRMap['testuser'].pull_requests).to.have.length(1, 'Pull requests does not match total');
+                const prinfo = PRMap['testuser'].pull_requests[0];
+                expect(prinfo.author).to.equal('testuser');
+                expect(prinfo.repository).to.equal('testuser/testrepo');
+                expect(prinfo.assignees).to.not.be.null;
+                expect(prinfo.assignees).to.equal('testuser', 'incorrectly parsed asignees')
                 done();
             },
             err => done(err)

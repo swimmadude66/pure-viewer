@@ -79,7 +79,7 @@ export class GithubService {
     * Returns the 100 most recently updated PRs assigned to each of the users
     * @param users: a list of github usernames to look for
     */
-    getPRsForAsignees(users: string[]): Observable<{[username: string]: UserInfo}> {
+    getPRsForAssignees(users: string[]): Observable<{[username: string]: UserInfo}> {
         const requests = [];
         users.forEach(u => {
             requests.push(this.getPRsForAssignee(u));

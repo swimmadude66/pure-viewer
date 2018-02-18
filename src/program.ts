@@ -241,7 +241,7 @@ program
             return prev;
         }, []);
         parseAuth(opts)
-        .flatMap(_ => github.getPRsForAsignees(resolved))
+        .flatMap(_ => github.getPRsForAssignees(resolved))
         .subscribe(
             PRMap => {
                 logger.log(formatResults(PRMap));
