@@ -4,7 +4,7 @@ _Get open pull requests for any set of github users_
 
 ## Installation
 
-Clone this repo, and run `npm install`
+`npm install -g pure-viewer`
 
 ## Usage
 Once installed globally, you can call PuRe by `pure-viewer` or its alias `prv`.

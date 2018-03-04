@@ -5,6 +5,7 @@
   "main": "dist/program.js",
   "scripts": {
     "build": "tsc",
+    "prestart": "rimraf ./dist && tsc",
     "start": "node dist/program.js",
     "test": "mocha -r ts-node/register src/tests/*.spec.ts --exit",
     "clean": "rimraf ./dist",

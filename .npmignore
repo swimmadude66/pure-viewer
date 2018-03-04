@@ -2,4 +2,5 @@ src/
 .editorconfig
 .gitignore
 tsconfig.json
+.vscode/
 
