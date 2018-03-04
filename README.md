@@ -4,11 +4,7 @@ _Get open pull requests for any set of github users_
 
 ## Installation
 
-Clone this repo, and run `npm install -g`
-
-*ALTERNATIVELY*
-
-Install from npm with `npm i -g pure-viewer` (assuming this gets published to npm *TBD*)
+Clone this repo, and run `npm install`
 
 ## Usage
 Once installed globally, you can call PuRe by `pure-viewer` or its alias `prv`.
